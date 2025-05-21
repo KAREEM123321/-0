@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>لعبة الألغاز - 100 سؤال</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+      direction: rtl;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: yellow;
+    }
+    #question {
+      font-size: 22px;
+      margin: 20px auto;
+      max-width: 600px;
+      color: white;
+    }
+    .option {
+      background: #222;
+      margin: 8px auto;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 400px;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: 1px solid white;
+    }
+    .option:hover {
+      background: #1e90ff;
+    }
+    #message {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #next-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+    }
+    #final-image {
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>لعبة الألغاز - سؤال <span id="level-num">1</span> من 100</h1>
+<div id="question">جارٍ التحميل...</div>
+<div id="options"></div>
+<div id="message"></div>
+<button id="next-btn">التالي</button>
+<img id="final-image" src="" alt="نتيجة اللعبة" width="150" />
+
+<!-- الأصوات -->
+<audio id="correct-sound" src="correct.mp3"></audio>
+<audio id="wrong-sound" src="wrong.mp3"></audio>
+
+<script>
+  const questions = [
+    { question: "ما هو عكس سريع؟", options: ["بطيء", "حار", "قوي", "قريب"], answer: "بطيء" },
+    { question: "كم عدد أرجل العنكبوت؟", options: ["6", "8", "10", "4"], answer: "8" },
+    // إضافة 98 سؤال رياضي صعب:
+  ];
+  for (let i = 3; i <= 100; i++) {
+    let x = i + 10;
+    let y = i + 5;
+    let result = x * y;
+    questions.push({
+      question: `ما حاصل ضرب ${x} × ${y}؟`,
+      options: [result, result + 10, result - 5, result + 20].map(String),
+      answer: String(result)
+    });
+  }
+
+  let current = 0;
+  const questionEl = document.getElementById("question");
+  const optionsEl = document.getElementById("options");
+  const messageEl = document.getElementById("message");
+  const nextBtn = document.getElementById("next-btn");
+  const levelNumEl = document.getElementById("level-num");
+  const correctSound = document.getElementById("correct-sound");
+  const wrongSound = document.getElementById("wrong-sound");
+  const finalImage = document.getElementById("final-image");
+
+  function loadQuestion() {
+    const q = questions[current];
+    levelNumEl.textContent = current + 1;
+    questionEl.textContent = q.question;
+    optionsEl.innerHTML = "";
+    messageEl.textContent = "";
+    finalImage.style.display = "none";
+    nextBtn.style.display = "none";
+
+    q.options.sort(() => Math.random() - 0.5);
+    q.options.forEach(opt => {
+      const div = document.createElement("div");
+      div.className = "option";
+      div.textContent = opt;
+      div.onclick = () => selectOption(div, opt);
+      optionsEl.appendChild(div);
+    });
+  }
+
+  function selectOption(div, selected) {
+    const correct = questions[current].answer;
+    if (selected === correct) {
+      correctSound.play();
+      messageEl.textContent = "✅ إجابة صحيحة!";
+      messageEl.style.color = "green";
+      nextBtn.style.display = "inline-block";
+      disableOptions();
+    } else {
+      wrongSound.play();
+      messageEl.textContent = "❌ إجابة خاطئة!";
+      messageEl.style.color = "red";
+      div.style.background = "darkred";
+      div.style.color = "white";
+      div.style.pointerEvents = "none";
+    }
+  }
+
+  function disableOptions() {
+    document.querySelectorAll(".option").forEach(opt => {
+      opt.style.pointerEvents = "none";
+    });
+  }
+
+  nextBtn.onclick = () => {
+    current++;
+    if (current >= questions.length) {
+      questionEl.textContent = "🎉 تهانينا! أنهيت جميع الأسئلة.";
+      optionsEl.innerHTML = "";
+      messageEl.textContent = "";
+      nextBtn.style.display = "none";
+      finalImage.src = "smile.png";
+      finalImage.style.display = "block";
+    } else {
+      loadQuestion();
+    }
+  };
+
+  loadQuestion();
+</script>
+
+</body>
+</html>
